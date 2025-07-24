@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Signin</title>
+</head>
+<body>
+  <h2>Admin Signin</h2>
+  <form id="adminSignin">
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <button type="submit">Sign In</button>
+  </form>
+  <script>
+    document.getElementById("adminSignin").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      fetch("/api/admin/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        localStorage.setItem("adminToken", data.token);
+        window.location.href = "admin-dashboard.html";
+      })
+      .catch(() => alert("Signin failed"));
+    });
+  </script>
+</body>
+</html>

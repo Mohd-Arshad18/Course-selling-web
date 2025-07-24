@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+</head>
+<body>
+  <h2>Create Course</h2>
+  <form id="createCourse">
+    <input type="text" name="title" placeholder="Title" required><br>
+    <textarea name="description" placeholder="Description" required></textarea><br>
+    <input type="text" name="imgURL" placeholder="Image URL"><br>
+    <input type="number" name="price" placeholder="Price" required><br>
+    <button type="submit">Create Course</button>
+  </form>
+  <h2>Your Courses</h2>
+  <div id="courses"></div>
+  <script>
+    const token = localStorage.getItem("adminToken");
+    document.getElementById("createCourse").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      fetch("/api/admin/course", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          token
+        },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message))
+      .catch(() => alert("Failed to create course"));
+    });
+
+    fetch("/api/admin/course/bulk", {
+      headers: { token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("courses");
+      data.courses.forEach(course => {
+        const div = document.createElement("div");
+        div.innerHTML = `<h3>${course.title}</h3><p>${course.description}</p>`;
+        container.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>

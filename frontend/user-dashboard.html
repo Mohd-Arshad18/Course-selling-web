@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Dashboard</title>
+</head>
+<body>
+  <h2>Purchased Courses</h2>
+  <div id="purchases"></div>
+  <script>
+    const token = localStorage.getItem("userToken");
+    fetch("/api/user/purchases", {
+      headers: { token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("purchases");
+      data.courseData.forEach(course => {
+        const div = document.createElement("div");
+        div.innerHTML = `<h3>${course.title}</h3><p>${course.description}</p>`;
+        container.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>
