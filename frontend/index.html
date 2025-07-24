@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Course Preview</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Available Courses</h1>
+  <div id="courses"></div>
+  <script>
+    fetch("/api/course/preview")
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("courses");
+        data.courses.forEach(course => {
+          const div = document.createElement("div");
+          div.innerHTML = `<h2>${course.title}</h2><p>${course.description}</p><p>Price: ₹${course.price}</p>`;
+          container.appendChild(div);
+        });
+      });
+  </script>
+</body>
+</html>
