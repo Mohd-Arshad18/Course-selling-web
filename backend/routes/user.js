@@ -41,45 +41,65 @@ userRouter.post("/signup", async function(req, res){
 })
 
 userRouter.post("/signin", async function(req, res){
-    const { email, password } = req.body;
-    
-    const user = await userModel.findOne({ email });
+    try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Email and password are required"
+            });
+        }
+        
+        const user = await userModel.findOne({ email });
 
-    if (user && await bcrypt.compare(password, user.password)) {
-        const token = jwt.sign({ id: user._id }, JWT_USER_PASSWORD);
-        res.json({
-            message: "You are signed in",
-            token
-        });
-    } else {
-        res.status(403).json({
-            message: "Incorrect credentials"
+        if (user && await bcrypt.compare(password, user.password)) {
+            const token = jwt.sign({ id: user._id }, JWT_USER_PASSWORD);
+            res.json({
+                message: "You are signed in",
+                token
+            });
+        } else {
+            res.status(403).json({
+                message: "Incorrect credentials"
+            });
+        }
+    } catch(e) {
+        console.error("User signin error:", e);
+        res.status(500).json({
+            message: "Internal server error"
         });
     }
 });
 
 userRouter.get("/purchases", userMiddleware, async function (req, res){
-    const userId = req.userId;
-    
-    const purchases = await purchaseModel.find({
-        userId,
-    });
-    
-    let purchaseCourseIds = [];
-    
-    for(let i = 0; i<purchases.length ; i++){
-        purchaseCourseIds.push(purchases[i].courseId)
+    try {
+        const userId = req.userId;
+        
+        const purchases = await purchaseModel.find({
+            userId,
+        });
+        
+        let purchaseCourseIds = [];
+        
+        for(let i = 0; i < purchases.length; i++){
+            purchaseCourseIds.push(purchases[i].courseId);
+        }
+        
+        const courseData = await courseModel.find({
+            _id: { $in: purchaseCourseIds }
+        });
+        
+        res.json({
+            purchases,
+            courseData
+        });
+    } catch(e) {
+        console.error("Purchases error:", e);
+        res.status(500).json({
+            message: "Error fetching purchases"
+        });
     }
-    
-    const courseData = await courseModel.find({
-        _id: { $in: purchaseCourseIds }
-    })
-    
-    res.json({
-        purchases,
-        courseData
-    })
-})
+});
 
 module.exports = {
     userRouter: userRouter
