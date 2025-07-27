@@ -28,13 +28,11 @@ adminRouter.post("/signup", async function(req, res){
 adminRouter.post("/signin", async function(req, res){
     const { email, password} = req.body;
     
-    const hashedPassword = await bcrypt.hash(password, saltRound);
-    
     const user = adminModel.findOne({
         email: email
     })
     
-    if(user && await bcrypt.compare(hashedPassword, user.password)){
+    if(user && await bcrypt.compare(password, user.password)){
         const token = jwt.sign({
             id: user._id
         }, JWT_ADMIN_PASSWORD)
